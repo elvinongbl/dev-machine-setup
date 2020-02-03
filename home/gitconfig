@@ -1,0 +1,67 @@
+[user]
+ email = boon.leong.ong@intel.com
+ name = "Ong Boon Leong"
+
+[includeIf "gitdir:~/repos/elvinongbl-github/"]
+ path = ~/repos/elvinongbl-github/.gitconfig
+
+[sendemail]
+ smtpserver = smtp.intel.com
+ signedoffcc = false
+ suppresscc = all
+ chainreplyto = false
+ assume8bitEncoding = utf-8
+ from = "Ong Boon Leong <boon.leong.ong@intel.com>"
+ confirm = always
+
+[color]
+ diff = auto
+ ui = auto
+ interactive = auto
+ grep = always
+
+[color.branch]
+ current = green
+ local = white
+ remote = red
+ upstream = yellow
+ plain = white
+
+[color "grep"]
+ match = red
+
+[core]
+ editor = vi
+ gitproxy = ~/common/bin/socatproxy
+ whitespace = trailing-space,tab-in-indent
+ pager = sed 's/\t/>-------/g' | less -R
+
+[pw]
+server = https://patchwork.ozlabs.org/api/1.1
+project = https://patchwork.ozlabs.org/project/netdev/list/
+token = <My patchwork token>
+username = elvinongbl
+
+[alias]
+ co = checkout
+ dc = describe --contains
+ br = branch -v
+ ci = commit
+ st = status
+ sts= status -sb
+ ol = log --oneline
+ olf = log --pretty=format:\"%h [%ci %cn]: %s\"
+ cp = cherry-pick
+ showf = show --format=fuller
+ logf  = log --format=fuller
+
+## Team Forge Secure Git
+[review "https://git-*.devtools.intel.com/gerrit/"]
+  username = bong5
+
+[url "ssh://bong5@git-*.devtools.intel.com:29418/"]
+insteadOf=ssh://git-*.devtools.intel.com/
+insteadOf=ssh://git-*.devtools.intel.com:29418/
+insteadOf=git://git-*.devtools.intel.com/
+insteadOf=https://bong5@git-*.devtools.intel.com/gerrit/a/
+
