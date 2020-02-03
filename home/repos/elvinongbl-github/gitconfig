@@ -34,7 +34,6 @@
 
 [core]
  editor = vi
- gitproxy = /home/bong5/common/bin/socatproxy
  whitespace = trailing-space,tab-in-indent
  pager = sed 's/\t/>-------/g' | less -R
 
