@@ -1,0 +1,15 @@
+colorscheme desert
+set background=dark
+set nonumber
+set listchars=tab:>-,nbsp:#
+set list
+set hlsearch
+set tabstop=8
+highlight ExtraWhitespace ctermbg=red guibg=red
+match ExtraWhitespace /\s\+$/
+set tw=76
+set fo+=t
+
+" No annoying sound on errors
+set noerrorbells
+set novisualbell
