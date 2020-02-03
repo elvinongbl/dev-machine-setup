@@ -1,0 +1,59 @@
+[user]
+ email = elvinongbl@gmail.com
+ name  = Ong Boon Leong
+ username = elvinongbl
+
+[sendemail]
+ from = "Ong Boon Leong <elvinongbl@gmail.com>"
+ smtpServer = smtp.gmail.com
+ smtpUser = elvinongbl@gmail.com
+ smtpEncryption = tls
+ smtpServerPort = 587
+ smtpPass = <================== Gmail token ===================>
+ signedoffcc = false
+ suppresscc = all
+ chainreplyto = false
+ assume8bitEncoding = utf-8
+ confirm = always
+
+[color]
+ diff = auto
+ ui = auto
+ interactive = auto
+ grep = always
+
+[color.branch]
+ current = green
+ local = white
+ remote = red
+ upstream = yellow
+ plain = white
+
+[color "grep"]
+ match = red
+
+[core]
+ editor = vi
+ gitproxy = /home/bong5/common/bin/socatproxy
+ whitespace = trailing-space,tab-in-indent
+ pager = sed 's/\t/>-------/g' | less -R
+
+[pw]
+server = https://patchwork.ozlabs.org/api/1.1
+project = https://patchwork.ozlabs.org/project/netdev/list/
+token = <================= Patchwork token ====================>
+username = elvinongbl
+
+[alias]
+ co = checkout
+ dc = describe --contains
+ br = branch -v
+ ci = commit
+ st = status
+ sts= status -sb
+ ol = log --oneline
+ olf = log --pretty=format:\"%h [%ci %cn]: %s\"
+ cp = cherry-pick
+ showf = show --format=fuller
+ logf  = log --format=fuller
+
