@@ -46,3 +46,6 @@ else
   cp $HOME/repos/elvinongbl-github/.gitconfig	$HOME/.gitconfig
   rm $HOME/repos/elvinongbl-github/.gitconfig
 fi
+
+# Make sure ssh daemon is available
+sudo apt-get install -y openssh-server
