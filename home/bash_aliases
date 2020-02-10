@@ -38,6 +38,29 @@ alias bb='bitbake'
 # A bunch of specialized bash functions
 # ========================================================= #
 
+
+################
+# Display system information
+#
+function osystem_show () {
+    tmpfile=~/.tmpcpuinfo
+    echo "=========================================="
+    cat /etc/lsb-release
+    echo "=========================================="
+    cat /proc/cpuinfo > $tmpfile
+    model_name=$(cat $tmpfile | grep "model name" -m 1)
+    processor_count=$(cat $tmpfile | grep "processor" -c)
+    cache_size=$(cat $tmpfile | grep "cache size" -m 1)
+    cpu_mhz=$(cat $tmpfile | grep "cpu MHz")
+    echo -e "CPU information :- \
+       \n${model_name} \
+       \nprocessor count : ${processor_count} \
+       \n${cache_size} \
+       \n${cpu_mhz} \
+    "
+   rm $tmpfile
+}
+
 ################
 # Display tput support colors
 #
