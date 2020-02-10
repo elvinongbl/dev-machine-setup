@@ -48,7 +48,7 @@ else
   rm $HOME/repos/elvinongbl-github/.gitconfig
 fi
 
-# Make sure ssh daemon is available
+# Install ssh daemon for external access
 sudo apt-get install -y openssh-server
 
 # Install software packages for kernel development
