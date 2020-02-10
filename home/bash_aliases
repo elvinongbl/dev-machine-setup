@@ -88,7 +88,7 @@ function cocci_cc () {
 
     if [ "$num" = "0000" ]; then
         dir=${1%/*}
-        for f in $dir/!(0000*).patch; do
+        for f in $dir/!0000-*.patch; do
             scripts/get_maintainer.pl --no-m $f
         done | sort -u
     else
