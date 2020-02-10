@@ -68,6 +68,13 @@ function ksetup_config () {
     "
 }
 
+function kinstall_local () {
+    # For Ubuntu system, it provides /sbin/installkernel
+    # to install kernel to /boot, modules to /lib/modules/X.Y.Z
+    # and updates /boot/grub/grub.conf
+    sudo make modules_install install
+}
+
 ################
 # git send-email with get_maintainer.pl
 # bsendpatch 0001-something.patch -cc anyone@else.com
