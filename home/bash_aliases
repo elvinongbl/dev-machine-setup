@@ -76,6 +76,48 @@ function kinstall_local () {
 }
 
 ################
+# Grub2 development
+#
+function kgrub_show() {
+    echo -e "$ sudo cat /etc/default/grub"
+    sudo cat /etc/default/grub
+}
+
+# Change grub boot config to menu and verbose
+function kgrub_verbose () {
+    grubfile=/etc/default/grub
+    tmpfile1=~/.tmp_grub1
+    tmpfile2=~/.tmp_grub2
+    echo -e "Set GRUB_TIMEOUT_STYLE=menu TIMEOUT=10"
+    sed -e "s#GRUB_TIMEOUT_STYLE=hidden#GRUB_TIMEOUT_STYLE=menu#g" \
+        $grubfile > $tmpfile1
+    sed -e "s#GRUB_TIMEOUT=0#GRUB_TIMEOUT=10#g" \
+        $tmpfile1 > $tmpfile2
+    sed -e 's#CMDLINE_LINUX_DEFAULT="quiet splash"#CMDLINE_LINUX_DEFAULT="debug loglevel=7"#g' \
+        $tmpfile2 > $tmpfile1
+    sudo cp $tmpfile1 $grubfile
+    sudo update-grub2
+    rm $tmpfile1 $tmpfile2
+}
+
+# Change grub boot config to hidden and quiet
+function kgrub_hidden () {
+    grubfile=/etc/default/grub
+    tmpfile1=~/.tmp_grub1
+    tmpfile2=~/.tmp_grub2
+    echo -e "Set GRUB_TIMEOUT_STYLE=hidden TIMEOUT=0"
+    sed -e "s#GRUB_TIMEOUT_STYLE=menu#GRUB_TIMEOUT_STYLE=hidden#g" \
+        $grubfile > $tmpfile1
+    sed -e "s#GRUB_TIMEOUT=10#GRUB_TIMEOUT=0#g" \
+        $tmpfile1 > $tmpfile2
+    sed -e 's#CMDLINE_LINUX_DEFAULT="debug loglevel=7"#CMDLINE_LINUX_DEFAULT="quiet splash"#g' \
+        $tmpfile2 > $tmpfile1
+    sudo cp $tmpfile1 $grubfile
+    sudo update-grub2
+    rm $tmpfile1 $tmpfile2
+}
+
+################
 # git send-email with get_maintainer.pl
 # bsendpatch 0001-something.patch -cc anyone@else.com
 #
