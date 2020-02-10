@@ -62,6 +62,10 @@ function ksetup_config () {
     cp /boot/config-`uname -r`* .config
     # Silently update new configuration values to their default
     make olddefconfig
+    echo -e "Next step: \
+    \n make menuconfig     - continue to change .config \
+    \n make localmodconfig - use local kernel module only \
+    "
 }
 
 ################
