@@ -51,6 +51,9 @@ fi
 # Install ssh daemon for external access
 sudo apt-get install -y openssh-server
 
+# Install software packages for editing
+sudo apt-get install -y vim.nox
+
 # Install software packages for kernel development
 # Reference: https://kernelnewbies.org/OutreachyfirstpatchSetup
 sudo apt-get install -y \
