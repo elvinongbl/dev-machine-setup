@@ -54,6 +54,17 @@ function tput_colors () {
 }
 
 ################
+# Linux kernel development
+#
+function ksetup_config () {
+    # Copy config of current Linux version from /boot to cwd
+    echo "Linux kernel: setup .config from /boot for version=$(uname -r)"
+    cp /boot/config-`uname -r`* .config
+    # Silently update new configuration values to their default
+    make olddefconfig
+}
+
+################
 # git send-email with get_maintainer.pl
 # bsendpatch 0001-something.patch -cc anyone@else.com
 #
