@@ -1,0 +1,128 @@
+# ========================================================= #
+# A bunch of environment start-up
+# ========================================================= #
+
+##################
+# ssh-agent
+#
+# Start ssh-agent if not already started
+ssh_on=$(ls /tmp | grep ssh | wc -l)
+if [ x"$ssh_on" != x1 ]; then
+  eval $(ssh-agent -s)
+  ssh-add ~/.ssh/id_rsa
+  ssh-add ~/.ssh/id_rsa_gmail
+fi
+
+################
+# shell - git branch display
+# refer to ~/.bashrc for the original PS1 setting
+PS1='\[\033[01;32m\]\u\[\033[00m\]@\[\033[01;32m\]\h\[\033[00m\]:\[\033[01;32m\]\W\[\033[00m\]$(__git_ps1 " (%s)") \$ '
+
+# ========================================================= #
+# A bunch of command short-cut
+# ========================================================= #
+
+# A bunch of command aliases
+alias rebashrc='source ~/.bashrc'
+
+# General command line editting
+alias vv='vim.nox'
+alias ngrep="grep -rn"
+
+# Yocto Project
+alias bb='bitbake'
+
+# Common quick command for string parsing
+
+# ========================================================= #
+# A bunch of specialized bash functions
+# ========================================================= #
+
+################
+# Display tput support colors
+#
+function tput_colors () {
+    for fg_color in {0..7}; do
+        set_foreground=$(tput setaf $fg_color)
+        for bg_color in {0..7}; do
+            set_background=$(tput setab $bg_color)
+            echo -n $set_background$set_foreground
+            printf ' F:%s B:%s ' $fg_color $bg_color
+        done
+        echo $(tput sgr0)
+    done
+}
+
+################
+# git send-email with get_maintainer.pl
+# bsendpatch 0001-something.patch -cc anyone@else.com
+#
+function cocci_cc () {
+    shopt -s extglob
+    cd $(git rev-parse --show-toplevel) > /dev/null
+
+    name=${1##*/}
+    num=${name%%-*}
+
+    if [ "$num" = "0000" ]; then
+        dir=${1%/*}
+        for f in $dir/!(0000*).patch; do
+            scripts/get_maintainer.pl --no-m $f
+        done | sort -u
+    else
+        scripts/get_maintainer.pl $1
+    fi
+}
+
+function bsendpatch () {
+  patch=$1
+  shift
+  git send-email --cc-cmd=cocci_cc $@ $patch
+}
+
+function bsendpatchset () {
+  patchfolder=$1
+  shift
+  patchset=$(ls -1 $patchfolder)
+
+  for patch in $patchset; do
+    bsendpatch $patchfolder/$patch $@
+  done
+}
+
+# ========================================================= #
+# A bunch of expert command
+# ========================================================= #
+
+##################
+# Git commands
+#
+# git log style of hisotry with commit-date, committer name, digest & subject
+# $ git log --pretty=format:"%cd %cn %h: %s" --graph'
+
+##################
+# Gerrit commands
+#
+# To automatically add reviewer to gerrit system
+# $ git push origin HEAD:refs/for/master%r=xyz@somecorp.com,r=abc@somecorp.com,r=def@somecorp.com'
+
+##################
+# Jenkins commands
+#
+# Control Jenkins server during run-time
+# $ sudo service jenkins [start | stop | restart | status]
+#
+# Enable/Disable Jenkins service during start-up
+# $ sudo systemctl [enable | disable jenkins]
+
+################
+# putty command
+#
+# $ sudo putty -fn "FreeMono 16" -serial -sercfg 115200,8,n,1 /dev/ttyUSB0
+
+#################
+# strace commands
+#
+# $ strace -xx -e verbose=%network COMMAND
+#   e.g. strace -xx -e verbose=%network tc action show action simple
+

@@ -23,7 +23,8 @@ sudo apt-get upgrade
 
 cp ./home/vimrc		$HOME/.vimrc
 cp ./home/dircolors	$HOME/.dircolors
-echo -e "Environment setup: .vimrc .dircolors"
+cp ./home/bash_aliases	$HOME/.bash_aliases
+echo -e "Environment setup: .vimrc .dircolors .bash_aliases"
 
 mkdir -p $HOME/common/bin
 
