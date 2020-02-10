@@ -50,3 +50,11 @@ fi
 
 # Make sure ssh daemon is available
 sudo apt-get install -y openssh-server
+
+# Install software packages for kernel development
+# Reference: https://kernelnewbies.org/OutreachyfirstpatchSetup
+sudo apt-get install -y \
+  vim libncurses5-dev gcc make git \
+  exuberant-ctags libssl-dev bison flex libelf-dev bc
+
+
