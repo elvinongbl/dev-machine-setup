@@ -60,4 +60,6 @@ sudo apt-get install -y \
   vim libncurses5-dev gcc make git \
   exuberant-ctags libssl-dev bison flex libelf-dev bc
 
-
+# Install software packages for system monitoring
+sudo apt-get install -y \
+  i7z

@@ -61,6 +61,12 @@ function osystem_show () {
    rm $tmpfile
 }
 
+function osystem_cpukhz_runtime () {
+    # print CPU khz run-time on current terminal
+    # i7z understands i3, i5 & i7 CPU
+    sudo i7z
+}
+
 ################
 # Display tput support colors
 #
