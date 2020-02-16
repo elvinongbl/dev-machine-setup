@@ -38,6 +38,18 @@ alias bb='bitbake'
 # A bunch of specialized bash functions
 # ========================================================= #
 
+################
+# General function
+#
+function acat () {
+    local file=$1
+    if [ -f $file ]; then
+        echo "$(cat $file)"
+    else
+        echo "N/A"
+    fi
+}
+
 
 ################
 # Display system information
@@ -65,6 +77,48 @@ function osystem_cpukhz_runtime () {
     # print CPU khz run-time on current terminal
     # i7z understands i3, i5 & i7 CPU
     sudo i7z
+}
+
+function osystem_thermal_show () {
+    local syspath=/sys/class/thermal
+    local cool_dev_max=$(find $syspath -name "cooling_device*" | wc -l)
+    local ther_zone_max=$(find $syspath -name "thermal_zone*" | wc -l)
+
+    printf "Cool Dev\tType\t\tModalias\tCur State\tMax State\n"
+    for (( i = 0; i < $cool_dev_max; i++ )); do
+        local devpath=$syspath/cooling_device$i
+
+        local type=$(acat $devpath/type)
+        local modalias=$(acat $devpath/device/modalias)
+        local cur_state=$(acat $devpath/cur_state)
+        local max_state=$(acat $devpath/max_state)
+
+        printf "%8d\t%8s\t%s\t%8d\t%8d\n" $i $type $modalias $cur_stat $max_state
+    done
+
+    printf "\nThemZone\tType\t\tTmpr\n"
+
+    for (( i = 0; i < $ther_zone_max; i++ )); do
+        local devpath=$syspath/thermal_zone$i
+        local type=$(acat $devpath/type)
+        local temp=$(acat $devpath/temp)
+
+        local trip_p_max=$(find $devpath/ -name "trip_point_*_temp" | wc -l)
+
+        printf "%8d\t%8s\t%d\tTrip Points(%d):\t" $i $type $temp $trip_p_max
+
+        for (( j = 0; j < $trip_p_max; j++ )); do
+            local trip_temp="$devpath/trip_point_"$j"_temp"
+            local trip_type="$devpath/trip_point_"$j"_type"
+            local p_temp=$(acat $trip_temp)
+            local p_type=$(acat $trip_type)
+            if (( $j%2 == 0 )) ; then
+                printf "\n\t\t\t\t\t\t"
+            fi
+            printf "%8d [%s]\t" $p_temp $p_type
+        done
+        printf "\n"
+    done
 }
 
 ################
