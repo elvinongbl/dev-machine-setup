@@ -36,6 +36,22 @@ function scp2dut() {
 	scp $SRC root@$DUT_SSH_IPADDR:$DST
 }
 
+function run_lp() {
+	echo -e "lp> $1"
+	ssh root@$LP_SSH_IPADDR $1
+}
+
+function run_lp_silence() {
+	ssh root@$LP_SSH_IPADDR $1
+}
+
+function scp2lp() {
+	SRC=$1
+	DST=$2
+	echo "scp $SRC to $LP_SSH_IPADDR:$DST"
+	scp $SRC root@$LP_SSH_IPADDR:$DST
+}
+
 # display_eth_info $DEVNAME $COMMENT_STRING
 # e.g. display_eth_info $LP_B2B_DEVNAME "Link Partner"
 function display_eth_info () {
