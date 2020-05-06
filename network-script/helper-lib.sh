@@ -20,6 +20,22 @@ function print_banner () {
 	echo -e "\n"
 }
 
+function run_dut() {
+	echo -e "dut> $1"
+	ssh root@$DUT_SSH_IPADDR $1
+}
+
+function run_dut_silence() {
+	ssh root@$DUT_SSH_IPADDR $1
+}
+
+function scp2dut() {
+	SRC=$1
+	DST=$2
+	echo "scp $SRC to $DUT_SSH_IPADDR:$DST"
+	scp $SRC root@$DUT_SSH_IPADDR:$DST
+}
+
 # display_eth_info $DEVNAME $COMMENT_STRING
 # e.g. display_eth_info $LP_B2B_DEVNAME "Link Partner"
 function display_eth_info () {
