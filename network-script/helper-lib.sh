@@ -59,3 +59,14 @@ function display_eth_info () {
 
 	print_separator
 }
+
+function remove_all_ipaddr () {
+	DEVNAME=$1
+	ip address flush dev $DEVNAME
+}
+
+function add_ipaddr () {
+	DEVNAME=$1
+	ADDR=$2
+	ip address add $ADDR/24 dev $DEVNAME
+}
