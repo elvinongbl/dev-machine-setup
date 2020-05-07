@@ -20,6 +20,10 @@ function print_banner () {
 	echo -e "\n"
 }
 
+function print_time() {
+	date +"%Y%m%d-%HH%MM"
+}
+
 function run_dut() {
 	echo -e "dut> $1"
 	ssh root@$DUT_SSH_IPADDR $1
@@ -30,8 +34,23 @@ function run_dut_silence() {
 }
 
 function test_dut() {
-	echo -e "dut test> $1"
-	ssh root@$DUT_SSH_IPADDR "cd $NETSCRIPT_INSTALL/tests; ./$1"
+	LOGDIR=$(run_dut_silence "cat ${NETSCRIPT_INSTALL}/.logpath")
+	LOG=$(echo "$1" | sed -e "s#\.sh#\.log#g")
+	echo -e "dut test> $1 [$LOGDIR/$LOG]"
+	ssh root@$DUT_SSH_IPADDR "cd $NETSCRIPT_INSTALL/tests; ./$1 > $LOGDIR/$LOG"
+}
+
+function getlogs_dut() {
+	LOGDIRPATH=$(run_dut_silence "cat ${NETSCRIPT_INSTALL}/.logpath")
+	LOGDIR=$(echo $LOGDIRPATH | grep -o -P "(?<=${NETSCRIPT_LOG}/).*")
+	run_dut_silence "cd $LOGDIRPATH/..; tar -jcvf $LOGDIR.tar.bz2 $LOGDIR"
+	mkdir -p ${TC_LOGS}
+	run_dut_silence "scp -o StrictHostKeyChecking=no $LOGDIRPATH/../$LOGDIR.tar.bz2 ${TC_USER}@${TC_IPADDR}:${TC_LOGS}/"
+	CWD=$(pwd)
+	cd ${TC_LOGS}
+	tar xf $LOGDIR.tar.bz2
+	rm $LOGDIR.tar.bz2
+	cd $CWD
 }
 
 function scp2dut() {
@@ -60,6 +79,14 @@ function scp2lp() {
 	DST=$2
 	echo "scp $SRC to $LP_SSH_IPADDR:$DST"
 	scp $SRC root@$LP_SSH_IPADDR:$DST
+}
+
+function setup_test_time() {
+	TIME=$1
+	run_dut "mkdir -p ${NETSCRIPT_LOG}/$TIME"
+	run_dut "echo "${NETSCRIPT_LOG}/$TIME" > ${NETSCRIPT_INSTALL}/.logpath"
+	run_lp "mkdir -p ${NETSCRIPT_LOG}/$TIME"
+	run_lp "echo "${NETSCRIPT_LOG}/$TIME" > ${NETSCRIPT_INSTALL}/.logpath"
 }
 
 # display_eth_info $DEVNAME $COMMENT_STRING
