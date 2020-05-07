@@ -29,6 +29,11 @@ function run_dut_silence() {
 	ssh root@$DUT_SSH_IPADDR $1
 }
 
+function test_dut() {
+	echo -e "dut test> $1"
+	ssh root@$DUT_SSH_IPADDR "cd $NETSCRIPT_INSTALL/tests; ./$1"
+}
+
 function scp2dut() {
 	SRC=$1
 	DST=$2
@@ -43,6 +48,11 @@ function run_lp() {
 
 function run_lp_silence() {
 	ssh root@$LP_SSH_IPADDR $1
+}
+
+function test_lp() {
+	echo -e "lp test> $1"
+	ssh root@$LP_SSH_IPADDR "cd $NETSCRIPT_INSTALL/tests; ./$1"
 }
 
 function scp2lp() {
