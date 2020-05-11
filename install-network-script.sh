@@ -26,3 +26,14 @@ run_lp 'cat /dev/zero | ssh-keygen -q -N ""'
 run_lp_silence "cat ${LP_HOME}/.ssh/id_rsa.pub" >> ${TC_HOME}/.ssh/authorized_keys
 run_lp 'dmidecode -t 1 | grep "Product Name" | cut -d":" -f2 > ~/.machinename'
 run_lp "scp -o StrictHostKeyChecking=no ~/.machinename ${TC_USER}@${TC_IPADDR}:${TC_HOME}/lp-machine"
+
+# Set the DUT's & LP's time to be consistent with Test Center's
+# Note: DUT & LP's time is UTC-based and cannot be changed.
+UTC_DATE=$(date -u +%Y%m%d)
+run_dut "date -u +%Y%m%d -s $UTC_DATE"
+run_lp "date -u +%Y%m%d -s $UTC_DATE"
+
+UTC_TIME=$(date -u +%T)
+TIME=$(date +%s)
+run_dut "date -u +%s -s $UTC_TIME"
+run_lp "date - u +%s -s $UTC_TIME"
