@@ -29,21 +29,93 @@ function ethtool_change_link() {
 	print_exe "ethtool -s $DEVNAME duplex $DUP speed $SP autoneg on"
 }
 
-function ethtool_adv_speed() {
+function ethtool_adv_cap() {
 	local DEVNAME=$1
-	local SPEED=$2
+	local CAP=$2
 
-	case "$SPEED" in
-	1000)
-		ADV=32
-		;;
-	100)
-		ADV=8
-		;;
-	10)
-		ADV=2
-		;;
-	esac
+	# https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/6/html/deployment_guide/s1-ethtool
+	if [ x"$CAP" == x"10half" ]; then
+		ADV=0x001
+	fi
+
+	if [ x"$CAP" == x"10full" ]; then
+		ADV=0x002
+	fi
+
+	if [ x"$CAP" == x"100half" ]; then
+		ADV=0x004
+	fi
+
+	if [ x"$CAP" == x"100full" ]; then
+		ADV=0x008
+	fi
+
+	if [ x"$CAP" == x"1000half" ]; then
+		ADV=0x010
+	fi
+
+	if [ x"$CAP" == x"1000full" ]; then
+		ADV=0x020
+	fi
+
+	if [ x"$CAP" == x"2500full" ]; then
+		ADV=0x8000
+	fi
+
+	if [ x"$CAP" == x"10000full" ]; then
+		ADV=0x1000
+	fi
+
+	if [ x"$CAP" == x"20000mld2" ]; then
+		ADV=0x20000
+	fi
+
+	if [ x"$CAP" == x"20000kr2" ]; then
+		ADV=0x40000
+	fi
+
+	# Specials combo to help testing
+	if [ x"$CAP" == x"10_1000full" ]; then
+		ADV=0x2A
+	fi
+
+	if [ x"$CAP" == x"10_100half" ]; then
+		ADV=0x05
+	fi
+
+	if [ x"$CAP" == x"10_1000both" ]; then
+		ADV=0x3F
+	fi
 
 	print_exe "ethtool -s $DEVNAME advertise $ADV"
+}
+
+# Make the LP's full capability as it is.
+# Try 10M to 1000M both full & half duplex
+function run_lp_restore_linkmode() {
+	local ROLE=$1
+	if [ x"$ROLE" == x"DUT" ]; then
+		run_lp "source $NETSCRIPT_INSTALL/setup-global.sh; \
+			source $NETSCRIPT_INSTALL/helper-lib.sh; \
+			source $NETSCRIPT_INSTALL/ethtool-lib.sh; \
+			ethtool_adv_cap $LP_B2B_DEVNAME 10_1000both; \
+			"
+	else
+		run_dut "source $NETSCRIPT_INSTALL/setup-global.sh; \
+			source $NETSCRIPT_INSTALL/helper-lib.sh; \
+			source $NETSCRIPT_INSTALL/ethtool-lib.sh; \
+			ethtool_adv_cap $DUT_B2B_DEVNAME 10_1000both \
+			"
+	fi
+}
+
+# Make the DUT's full capability as it is.
+# Try 10M to 1000M both full & half duplex
+function dut_restore_linkmode() {
+	local ROLE=$1
+	if [ x"$ROLE" == x"LP" ]; then
+		ethtool_adv_cap $LP_B2B_DEVNAME 10_1000both
+	else
+		ethtool_adv_cap $DUT_B2B_DEVNAME 10_1000both
+	fi
 }
