@@ -21,9 +21,11 @@ setup_test_time ${TEST_TIME}
 
 # Ping Test
 test_dut "test-01-ping.sh"
-test_dut "test-02-autoneg.sh"
 test_lp "test-01-ping.sh"
+# Auto-negotiation with speed change Test
+test_dut "test-02-autoneg.sh"
 test_lp "test-02-autoneg.sh"
 
 # Get result from DUT
 getlogs_dut
+getlogs_lp
