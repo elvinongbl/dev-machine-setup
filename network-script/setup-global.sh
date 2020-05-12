@@ -26,6 +26,7 @@ export NETSCRIPT_LOG=${NETSCRIPT_INSTALL}/../test-logs
 # DUT GOld Linux kernel version
 export GOLDVER_FILE=${DUT_HOME}/.goldversion
 export TESTVER_FILE=${DUT_HOME}/.testversion
+export BACKUPVER_FILE=${DUT_HOME}/.backupversion
 
 # Test Center
 export TC_USER=sashimi
