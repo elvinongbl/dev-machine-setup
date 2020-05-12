@@ -5,14 +5,20 @@ source ./network-script/helper-lib.sh
 
 #Roll-back version
 RB_VER=$1
+RM_VER=$2
+
+echo -e "Delete upgraded kernel version=$RM_VER"
+run_dut "rm /boot/bzImage-kernel"
+run_dut "rm /boot/config-${RM_VER}"
+run_dut "rm /boot/System.map-${RM_VER}"
+run_dut "rm -rf /lib/modules/${RM_VER}"
+run_dut "rm ${TESTVER_FILE}"
 
 echo -e "Rollback kernel version=$RB_VER"
-run_dut "mv /boot/bzImage-kernel-${RB_VER}.backup       /boot/bzImage-kernel"
-run_dut "mv /boot/config-${RB_VER}.backup               /boot/config-${RB_VER}"
-run_dut "mv /boot/System.map-${RB_VER}.backup           /boot/System.map-${RB_VER}"
-run_dut "mv /lib/modules/${RB_VER}.backup               /lib/modules/${RB_VER}"
-# Uncomment if Linux system contain module symbols package
-# run_dut "mv /boot/Module.symvers-${RB_VER}.backup       /boot/Module.symvers-${RB_VER}"
+run_dut "mv /boot/BACKUP-bzImage-kernel-${RB_VER}    /boot/bzImage-kernel"
+run_dut "mv /boot/BACKUP-config-${RB_VER}           /boot/config-${RB_VER}"
+run_dut "mv /boot/BACKUP-System.map-${RB_VER}       /boot/System.map-${RB_VER}"
+run_dut "mv /lib/modules/BACKUP-${RB_VER}           /lib/modules/${RB_VER}"
 
 print_separator
 run_dut "ls /boot | grep ${RB_VER}"
