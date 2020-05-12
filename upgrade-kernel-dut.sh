@@ -45,8 +45,12 @@ run_dut "mv $DUT_DST/lib/modules/${UPGRADE_VER}        /lib/modules/"
 
 # Store the LINUX version that is used for current booting
 run_dut "echo ${UPGRADE_VER} > ${TESTVER_FILE}"
+run_dut "echo ${CUR_VER} > ${BACKUPVER_FILE}"
+
 
 print_separator
-run_dut "ls /boot | grep ${UPGRADE_VER}"
-run_dut "ls /lib/modules/ | grep ${UPGRADE_VER}"
-print_banner "Rollback Cmd > ./rollback-kernel-dut.sh $CUR_VER $UPGRADE_VER"
+run_dut "ls /boot"
+run_dut "ls /lib/modules/"
+print_separator
+
+print_banner "To rollback > ./rollback-kernel-dut.sh"
