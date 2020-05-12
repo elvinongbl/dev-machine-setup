@@ -23,6 +23,10 @@ export LP_HOME="/home/root"
 export NETSCRIPT_INSTALL=${DUT_HOME}/network-script
 export NETSCRIPT_LOG=${NETSCRIPT_INSTALL}/../test-logs
 
+# DUT GOld Linux kernel version
+export GOLDVER_FILE=${DUT_HOME}/.goldversion
+export TESTVER_FILE=${DUT_HOME}/.testversion
+
 # Test Center
 export TC_USER=sashimi
 export TC_HOME=/home/${TC_USER}
