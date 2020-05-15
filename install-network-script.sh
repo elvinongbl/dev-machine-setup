@@ -56,3 +56,14 @@ scp install-self-report.sh root@$LP_SSH_IPADDR:${NETSCRIPT_INSTALL}/install-self
 scp -r network-script/etc/* root@$LP_SSH_IPADDR:/etc/
 run_lp "cd ${NETSCRIPT_INSTALL}; chmod a+x ./self-report.sh"
 run_lp "cd ${NETSCRIPT_INSTALL}; chmod a+x ./install-self-report.sh; ./install-self-report.sh"
+
+## Install & build TSN evaluator at DUT & LP
+echo "scp tsn-evaluator to DUT($DUT_SSH_IPADDR)"
+run_dut "mkdir -p ${NETSCRIPT_INSTALL}"
+scp -r ${TC_HOME}/work/tsn-evaluator root@$DUT_SSH_IPADDR:${NETSCRIPT_INSTALL}
+run_dut "cd ${NETSCRIPT_INSTALL}/tsn-evaluator; ./build.sh"
+
+echo "scp tsn-evaluator to LP($LP_SSH_IPADDR)"
+run_lp "mkdir -p ${NETSCRIPT_INSTALL}"
+scp -r ${TC_HOME}/work/tsn-evaluator root@$LP_SSH_IPADDR:${NETSCRIPT_INSTALL}
+run_lp "cd ${NETSCRIPT_INSTALL}/tsn-evaluator; ./build.sh"
