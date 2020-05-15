@@ -1,0 +1,12 @@
+[Unit]
+Description=Auto Reporting every 1min
+Requires=self-reporting.service
+
+[Timer]
+Unit=self-reporting.service
+OnUnitInactiveSec=30
+RandomizedDelaySec=30
+AccuracySec=1s
+
+[Install]
+WantedBy=timers.target

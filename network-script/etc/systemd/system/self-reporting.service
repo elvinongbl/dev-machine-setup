@@ -1,0 +1,11 @@
+# /etc/systemd/system/self-report.service
+
+[Unit]
+Description=Runs self reporting
+Wants=self-reporting.timer
+
+[Service]
+ExecStart=/home/root/network-script/self-report.sh
+
+[Install]
+WantedBy=multi-user.target

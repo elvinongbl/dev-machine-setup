@@ -7,11 +7,13 @@ echo "scp network-script to DUT($DUT_SSH_IPADDR)"
 run_dut "rm -rf ${NETSCRIPT_INSTALL}"
 run_dut "mkdir -p ${NETSCRIPT_INSTALL}"
 scp -r network-script/* root@$DUT_SSH_IPADDR:${NETSCRIPT_INSTALL}
+run_dut "echo EHL-A-DUT > ${NETSCRIPT_INSTALL}/devrole.txt"
 
 echo "scp network-script to LP($LP_SSH_IPADDR)"
 run_lp "rm -rf ${NETSCRIPT_INSTALL}"
 run_lp "mkdir -p ${NETSCRIPT_INSTALL}"
 scp -r network-script/* root@$LP_SSH_IPADDR:${NETSCRIPT_INSTALL}
+run_lp "echo EHL-B-LP > ${NETSCRIPT_INSTALL}/devrole.txt"
 
 # Create new DUT ssh public key and add that to Test Center for scp test log
 run_dut "rm -rf ${DUT_HOME}/.ssh"
@@ -37,3 +39,20 @@ UTC_TIME=$(date -u +%T)
 TIME=$(date +%s)
 run_dut "date -u +%s -s $UTC_TIME"
 run_lp "date - u +%s -s $UTC_TIME"
+
+## Install platform environment files
+scp -r home/vimrc root@$DUT_SSH_IPADDR:~/.vimrc
+scp -r home/vimrc root@$LP_SSH_IPADDR:~/.vimrc
+
+## Install auto-reporting automation
+scp self-report.sh root@$DUT_SSH_IPADDR:${NETSCRIPT_INSTALL}/self-report.sh
+scp install-self-report.sh root@$DUT_SSH_IPADDR:${NETSCRIPT_INSTALL}/install-self-report.sh
+scp -r network-script/etc/* root@$DUT_SSH_IPADDR:/etc/
+run_dut "cd ${NETSCRIPT_INSTALL}; chmod a+x ./self-report.sh"
+run_dut "cd ${NETSCRIPT_INSTALL}; chmod a+x ./install-self-report.sh; ./install-self-report.sh"
+
+scp self-report.sh root@$LP_SSH_IPADDR:${NETSCRIPT_INSTALL}/self-report.sh
+scp install-self-report.sh root@$LP_SSH_IPADDR:${NETSCRIPT_INSTALL}/install-self-report.sh
+scp -r network-script/etc/* root@$LP_SSH_IPADDR:/etc/
+run_lp "cd ${NETSCRIPT_INSTALL}; chmod a+x ./self-report.sh"
+run_lp "cd ${NETSCRIPT_INSTALL}; chmod a+x ./install-self-report.sh; ./install-self-report.sh"
