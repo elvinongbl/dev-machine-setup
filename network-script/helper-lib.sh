@@ -125,6 +125,19 @@ function role2sshipaddr() {
 	fi
 	echo "UNKNOWN"
 }
+
+function role2report() {
+	local ROLE=$1
+	if [ "$ROLE" == "DUT" ]; then
+		echo "$DUT_REPORT"
+		exit 0
+	fi
+	if [ "$ROLE" == "LP" ]; then
+		echo "$LP_REPORT"
+		exit 0
+	fi
+	echo "UNKNOWN"
+}
  
 ################################################################################
 # Helper Functions for DUT
