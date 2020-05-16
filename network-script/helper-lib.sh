@@ -138,6 +138,19 @@ function role2report() {
 	fi
 	echo "UNKNOWN"
 }
+
+function role2sshdevname() {
+	local ROLE=$1
+	if [ "$ROLE" == "DUT" ]; then
+		echo "$DUT_SSH_DEVNAME"
+		exit 0
+	fi
+	if [ "$ROLE" == "LP" ]; then
+		echo "$LP_SSH_DEVNAME"
+		exit 0
+	fi
+	echo "UNKNOWN"
+}
  
 ################################################################################
 # Helper Functions for DUT

@@ -10,6 +10,8 @@ unset LP_B2B_IPADDR
 # SSH connection
 export DUT_SSH_IPADDR="172.30.181.114"
 export LP_SSH_IPADDR="172.30.181.103"
+export DUT_SSH_DEVNAME=enp0s20f0u4u4
+export LP_SSH_DEVNAME=enp0s20f0u4u4
 
 # DUT to LP B2B connection
 export DUT_B2B_DEVNAME="enp0s29f1"
