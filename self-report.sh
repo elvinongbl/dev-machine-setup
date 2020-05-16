@@ -2,9 +2,18 @@
 
 source /home/root/network-script/setup-global.sh
 
-devname=$(cat /home/root/network-script/devrole.txt)
+target_name=$(cat /home/root/network-script/devrole.txt)
+target_info=$(dmidecode -t 1 | grep "Product Name" | cut -d":" -f2)
 
-echo "Hello from $devname at $(date)" > /home/root/$devname-self-report.txt
-echo "$(ip addr show enp0s20f0u4u4 | grep "inet ")" >> /home/root/$devname-self-report.txt
+if [ "${target_name}" == "${DUT_REPORT}" ]; then
+	ROLE=DUT
+else
+	ROLE=LP
+fi
 
-scp -o StrictHostKeyChecking=no /home/root/$devname-self-report.txt ${TC_USER}@${TC_IPADDR}:~/test-logs
+target_ssh_devname=$(role2sshdevname $ROLE)
+
+echo "Hello from ${target_name}[${target_info}] at $(date)" > /home/root/${target_name}-self-report.txt
+echo "$(ip addr show ${target_ssh_devname} | grep "inet " | grep "${target_ssh_devname}")" >> /home/root/${target_name}-self-report.txt
+
+scp -o StrictHostKeyChecking=no /home/root/${target_name}-self-report.txt ${TC_USER}@${TC_IPADDR}:${TC_LOGS}
