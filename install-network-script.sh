@@ -7,13 +7,13 @@ echo "scp network-script to DUT($DUT_SSH_IPADDR)"
 run_dut "rm -rf ${NETSCRIPT_INSTALL}"
 run_dut "mkdir -p ${NETSCRIPT_INSTALL}"
 scp -r network-script/* root@$DUT_SSH_IPADDR:${NETSCRIPT_INSTALL}
-run_dut "echo EHL-A-DUT > ${NETSCRIPT_INSTALL}/devrole.txt"
+run_dut "echo ${DUT_REPORT} > ${NETSCRIPT_INSTALL}/devrole.txt"
 
 echo "scp network-script to LP($LP_SSH_IPADDR)"
 run_lp "rm -rf ${NETSCRIPT_INSTALL}"
 run_lp "mkdir -p ${NETSCRIPT_INSTALL}"
 scp -r network-script/* root@$LP_SSH_IPADDR:${NETSCRIPT_INSTALL}
-run_lp "echo EHL-B-LP > ${NETSCRIPT_INSTALL}/devrole.txt"
+run_lp "echo ${LP_REPORT} > ${NETSCRIPT_INSTALL}/devrole.txt"
 
 # Create new DUT ssh public key and add that to Test Center for scp test log
 run_dut "rm -rf ${DUT_HOME}/.ssh"

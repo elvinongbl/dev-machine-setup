@@ -20,6 +20,8 @@ export LP_B2B_IPADDR="192.168.1.2"
 # Target (DUT or LP) installation path
 export DUT_HOME="/home/root"
 export LP_HOME="/home/root"
+export DUT_REPORT="EHL-A-DUT"
+export LP_REPORT="EHL-B-LP"
 export NETSCRIPT_INSTALL=${DUT_HOME}/network-script
 export NETSCRIPT_LOG=${NETSCRIPT_INSTALL}/../test-logs
 
