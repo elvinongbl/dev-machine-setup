@@ -1,7 +1,9 @@
 #!/bin/bash
 #
-# print_separator
-# print_banner "title"
+
+################################################################################
+# Helper Functions for Printing/Displaying
+################################################################################
 
 function print_separator_short () {
 	echo -e "#############################"
@@ -24,6 +26,10 @@ function print_topic () {
 	print_separator_short
 }
 
+function print_line() {
+	echo -e "# $1"
+}
+
 function print_time() {
 	date +"%Y%m%d-%HH%MM"
 }
@@ -37,6 +43,10 @@ function print_exe_ret() {
 	$1
 	echo -e "> $? = $1"
 }
+
+################################################################################
+# Helper Functions for Role Conversion
+################################################################################
 
 function devname2role() {
 	local DEVNAME=$1
@@ -90,6 +100,36 @@ function role2lp() {
 	echo "UNKNOWN"
 }
 
+function role2home() {
+	local ROLE=$1
+	if [ "$ROLE" == "DUT" ]; then
+		echo "${DUT_HOME}"
+		exit 0
+	fi
+	if [ "$ROLE" == "LP" ]; then
+		echo "${LP_HOME}"
+		exit 0
+	fi
+	echo "UNKNOWN"
+}
+
+function role2sshipaddr() {
+	local ROLE=$1
+	if [ "$ROLE" == "DUT" ]; then
+		echo "$DUT_SSH_IPADDR"
+		exit 0
+	fi
+	if [ "$ROLE" == "LP" ]; then
+		echo "$LP_SSH_IPADDR"
+		exit 0
+	fi
+	echo "UNKNOWN"
+}
+ 
+################################################################################
+# Helper Functions for DUT
+################################################################################
+
 function run_dut() {
 	echo -e "dut> $1"
 	ssh -o StrictHostKeyChecking=no root@$DUT_SSH_IPADDR $1
@@ -100,10 +140,11 @@ function run_dut_silence() {
 }
 
 function test_dut() {
+	local TESTSCRIPT=$1
 	local LOGDIR=$(run_dut_silence "cat ${NETSCRIPT_INSTALL}/.logpath")
-	local LOG=DUT-$(echo "$1" | sed -e "s#\.sh#\.log#g")
-	echo -e "dut test> $1 [$LOGDIR/$LOG]"
-	ssh -o StrictHostKeyChecking=no root@$DUT_SSH_IPADDR "cd $NETSCRIPT_INSTALL/tests; ./$1 DUT > $LOGDIR/$LOG"
+	local LOG=DUT-$(echo "$TESTSCRIPT" | sed -e "s#\.sh#\.log#g")
+	echo -e "dut test> $TESTSCRIPT [$LOGDIR/$LOG]"
+	ssh -o StrictHostKeyChecking=no root@$DUT_SSH_IPADDR "cd $NETSCRIPT_INSTALL/tests; ./$TESTSCRIPT DUT > $LOGDIR/$LOG"
 }
 
 function getlogs_dut() {
@@ -126,6 +167,10 @@ function scp2dut() {
 	scp -o StrictHostKeyChecking=no $SRC root@$DUT_SSH_IPADDR:$DST
 }
 
+################################################################################
+# Helper Functions for LP
+################################################################################
+
 function run_lp() {
 	echo -e "lp> $1"
 	ssh -o StrictHostKeyChecking=no root@$LP_SSH_IPADDR $1
@@ -136,10 +181,11 @@ function run_lp_silence() {
 }
 
 function test_lp() {
+	local TESTSCRIPT=$1
 	local LOGDIR=$(run_lp_silence "cat ${NETSCRIPT_INSTALL}/.logpath")
-	local LOG=LP-$(echo "$1" | sed -e "s#\.sh#\.log#g")
-	echo -e "lp test> $1 [$LOGDIR/$LOG]"
-	ssh -o StrictHostKeyChecking=no root@$LP_SSH_IPADDR "cd $NETSCRIPT_INSTALL/tests; ./$1 LP > $LOGDIR/$LOG"
+	local LOG=LP-$(echo "$TESTSCRIPT" | sed -e "s#\.sh#\.log#g")
+	echo -e "lp test> $TESTSCRIPT [$LOGDIR/$LOG]"
+	ssh -o StrictHostKeyChecking=no root@$LP_SSH_IPADDR "cd $NETSCRIPT_INSTALL/tests; ./$TESTSCRIPT LP > $LOGDIR/$LOG"
 }
 
 function getlogs_lp() {
@@ -168,6 +214,75 @@ function setup_test_time() {
 	run_lp "mkdir -p ${NETSCRIPT_LOG}/$TIME"
 	run_lp "echo "${NETSCRIPT_LOG}/$TIME" > ${NETSCRIPT_INSTALL}/.logpath"
 }
+
+################################################################################
+# Helper Functions for running on target
+#
+# set_target and unset_target must be included to use the below functions
+################################################################################
+
+# set_target and unset_target must be included to use the below functions
+function set_target() {
+	export NS_GLOBAL_TARGET=$1
+}
+
+function unset_target() {
+	unset NS_GLOBAL_TARGET
+}
+
+function run_target() {
+	local TARGET=$(echo $NS_GLOBAL_TARGET)
+	local CMD="$1"
+	if [ "$TARGET" == "DUT" ]; then
+		run_dut "$CMD"
+	else
+		run_lp "$CMD"
+	fi
+}
+
+function run_target_silence() {
+	local TARGET=$(echo $NS_GLOBAL_TARGET)
+	local CMD="$1"
+	if [ "$TARGET" == "DUT" ]; then
+		run_dut_silence "$CMD"
+	else
+		run_lp_silence "$CMD"
+	fi
+}
+
+function test_target() {
+	local TARGET=$(echo $NS_GLOBAL_TARGET)
+	local TESTSCRIPT="$1"
+	if [ "$TARGET" == "DUT" ]; then
+		test_dut "$TESTSCRIPT"
+	else
+		test_lp "$TESTSCRIPT"
+	fi
+}
+
+function getlogs_target() {
+	local TARGET=$(echo $NS_GLOBAL_TARGET)
+	if [ "$TARGET" == "DUT" ]; then
+		getlogs_dut
+	else
+		getlogs_lp
+	fi
+}
+
+function scp2target() {
+	local TARGET=$(echo $NS_GLOBAL_TARGET)
+	local SRC="$1"
+	local DST="$2"
+	if [ "$TARGET" == "DUT" ]; then
+		scp2dut "$SRC" "$DST"
+	else
+		scp2lp "$SRC" "$DST"
+	fi
+}
+
+################################################################################
+# Misc Helper Functions
+################################################################################
 
 # display_eth_info $DEVNAME $COMMENT_STRING
 # e.g. display_eth_info $LP_B2B_DEVNAME "Link Partner"
@@ -233,5 +348,25 @@ function dut_restore_ipaddr() {
 		remove_all_ipaddr $DUT_B2B_DEVNAME;
 		sleep 1
 		add_ipaddr $DUT_B2B_DEVNAME $DUT_B2B_IPADDR;
+	fi
+}
+
+function flush_testlogs() {
+	YEAR=$(date +"%Y")
+	rm -rf ${TC_LOGS}/${YEAR}*
+}
+
+function flush_selfreport() {
+	rm -rf ${TC_LOGS}/EHL*
+}
+
+function alive_test() {
+	dut_alive=$(echo $(run_dut_silence "cat ~/${DUT_REPORT}*") | grep ${DUT_REPORT} -c)
+	lp_alive=$(echo $(run_lp_silence "cat ~/${LP_REPORT}*") | grep ${LP_REPORT} -c)
+
+	if [ x"$dut_alive" == x"0" ] || [ x"$lp_alive" == x"0" ]; then
+		echo "FAIL!!! DUT=$dut_alive LP=$lp_alive"
+	else
+		echo "PASS"
 	fi
 }
