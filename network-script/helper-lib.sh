@@ -357,7 +357,13 @@ function flush_testlogs() {
 }
 
 function flush_selfreport() {
-	rm -rf ${TC_LOGS}/EHL*
+	local ROLE=$1
+	if [ x"$ROLE" == x"DUT" ]; then
+		rm ${TC_LOGS}/${DUT_REPORT}*
+	else
+		rm ${TC_LOGS}/${LP_REPORT}*
+	fi
+
 }
 
 function alive_test() {

@@ -11,3 +11,6 @@ print_banner "Reboot @@ TARGET($ROLE:$ROLE_SSH_IPADDR)"
 set_target $ROLE
 run_target "reboot"
 unset_target
+
+# Clear Self-report
+flush_selfreport $ROLE
