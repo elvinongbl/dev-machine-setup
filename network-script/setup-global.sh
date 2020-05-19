@@ -8,8 +8,8 @@ unset LP_B2B_DEVNAME
 unset LP_B2B_IPADDR
 
 # SSH connection
-export DUT_SSH_IPADDR="172.30.181.114"
-export LP_SSH_IPADDR="172.30.181.103"
+export DUT_SSH_IPADDR="172.30.181.101"
+export LP_SSH_IPADDR="172.30.181.93"
 export DUT_SSH_DEVNAME=enp0s20f0u4u4
 export LP_SSH_DEVNAME=enp0s20f0u4u4
 
@@ -41,3 +41,5 @@ export TC_PUBKEY="id_rsa.pub"
 
 alias aplbrd="ssh root@$LP_SSH_IPADDR"
 alias ehlbrd="ssh root@$DUT_SSH_IPADDR"
+
+export UPGRADE_LINUX=${TC_HOME}/work/linux-ese-net/linux-5.4.32-ehl+-x86.tar.xz
