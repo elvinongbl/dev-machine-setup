@@ -13,13 +13,18 @@ if [ x"$alive" != x"PASS" ]; then
 fi
 
 if [ x"$LEVEL" == x"" ]; then
-	print_topic "Invalid option!" 
+	print_topic "Invalid option!"
 	print_line "Use ./dual-auto-upgrade-kernel.sh APP|KMOD|ALL"
 	exit
 fi
 
 # Delete previous authorized public keys
 rm ${TC_HOME}/.ssh/authorized_keys
+
+# Sometimes ssh session becomes invalid because IP changes in lab.
+# So, we also delete known_hosts on upgrade which involves reboot
+ssh-keygen -f "${TC_HOME}/.ssh/known_hosts" -R "${DUT_SSH_IPADDR}"
+ssh-keygen -f "${TC_HOME}/.ssh/known_hosts" -R "${LP_SSH_IPADDR}"
 
 # Update all network scripts in both DUT & LP
 ./install-network-script.sh DUT
@@ -36,9 +41,9 @@ if [ x"$LEVEL" == x"KMOD" ]; then
 	exit
 fi
 
-# reload kernel 
+# reload kernel
 ./rollback-kernel-target.sh DUT
-./rollback-kernel-target.sh LP 
+./rollback-kernel-target.sh LP
 ./upgrade-kernel-target.sh DUT ${UPGRADE_LINUX}
 ./upgrade-kernel-target.sh LP  ${UPGRADE_LINUX}
 ./reboot-target.sh DUT
