@@ -11,6 +11,8 @@ fi
 
 # Delete previous authorized public keys
 rm ${TC_HOME}/.ssh/authorized_keys
+# Keep personal vscode private keys
+cp ${TC_HOME}/.ssh/bong5-win-vscode.pub ${TC_HOME}/.ssh/authorized_keys
 
 # Update all network scripts in both DUT & LP
 ./install-network-script.sh DUT

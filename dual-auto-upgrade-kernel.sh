@@ -20,6 +20,8 @@ fi
 
 # Delete previous authorized public keys
 rm ${TC_HOME}/.ssh/authorized_keys
+# Keep personal vscode private keys
+cp ${TC_HOME}/.ssh/bong5-win-vscode.pub ${TC_HOME}/.ssh/authorized_keys
 
 # Sometimes ssh session becomes invalid because IP changes in lab.
 # So, we also delete known_hosts on upgrade which involves reboot
