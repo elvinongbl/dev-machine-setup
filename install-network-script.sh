@@ -16,10 +16,19 @@ run_target "mkdir -p ${NETSCRIPT_INSTALL}"
 scp2target "-r network-script/*" ${NETSCRIPT_INSTALL}
 run_target "echo ${TARGET_REPORT} > ${NETSCRIPT_INSTALL}/devrole.txt"
 
+# Uncomment below if this is the first installation
+scp -r ~/work/trace-cmd root@$ROLE_SSH_IPADDR:~/
+run_target "cd ~/trace-cmd; make && make install"
+
+# Uncomment below if this is the first installation
+scp /usr/bin/sshpass root@$ROLE_SSH_IPADDR:/usr/bin
+
 # Create new DUT ssh public key and add that to Test Center for scp test log
 run_target "rm -rf ${TARGET_HOME}/.ssh"
 run_target 'cat /dev/zero | ssh-keygen -q -N ""'
 run_target_silence "cat ${TARGET_HOME}/.ssh/id_rsa.pub" >> ${TC_HOME}/.ssh/authorized_keys
+TC_SSH_PUB=$(cat ~/.ssh/id_rsa.pub)
+run_target_silence "echo ${TC_SSH_PUB} > ~/.ssh/authorized_keys"
 
 # Set the DUT's & LP's time to be consistent with Test Center's
 # Note: DUT & LP's time is UTC-based and cannot be changed.
