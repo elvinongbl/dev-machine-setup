@@ -6,9 +6,10 @@ source ./network-script/helper-lib.sh
 # Level = "APP", = KMOD" (APP+Kernel Module), "ALL" (APP+Full kernel)
 LEVEL=$1
 
-alive=$(alive_test)
+alive=$(targets_alive_test)
 if [ x"$alive" != x"PASS" ]; then
         echo "ABORT: $alive"
+	#Comment here for the first update
         exit 0
 fi
 
