@@ -64,6 +64,20 @@ sudo apt-get install -y \
 sudo apt-get install -y \
   i7z
 
+# Install software packages for using Kernelshark
+# source: https://kernelshark.org/build.html
+# sudo apt-get install build-essential git cmake libjson-c-dev -y
+# sudo apt-get install freeglut3-dev libxmu-dev libxi-dev -y
+# sudo apt-get install qtbase5-dev -y
+# CWD=$(pwd)
+# cd $HOME/repos/
+# git clone https://git.kernel.org/pub/scm/utils/trace-cmd/trace-cmd.git/
+# cd trace-cmd
+# make && make gui
+# make install && make install_gui
+# cd $CWD
+sudo apt-get install -y kernelshark
+
 # Install vncserver & setup xfce for lightweight vnc session
 sudo apt-get install -y tightvncserver
 sudo apt-get install -y xfce4 xfce4-goodies
