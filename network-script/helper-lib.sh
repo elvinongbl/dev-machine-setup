@@ -21,6 +21,7 @@ function print_banner () {
 }
 
 function print_topic () {
+	echo -e "\n"
 	print_separator_short
 	echo -e "# $1 "
 	print_separator_short
@@ -34,14 +35,33 @@ function print_time() {
 	date +"%Y%m%d-%HH%MM"
 }
 
-function print_exe() {
+function run_cmd() {
 	echo -e "> $1"
-	$1
+	eval $1
 }
 
-function print_exe_ret() {
+function run_bash() {
+	echo -e "bash> $1"
+	bash -c "$1"
+}
+
+function run_cmd_ret() {
 	$1
 	echo -e "> $? = $1"
+}
+
+################################################################################
+# Misc Helper Functions
+################################################################################
+
+function saferm() {
+	local DIRECTORY=$1
+
+	if [ -d $DIRECTORY ]; then
+		run_cmd "rm -rf $DIRECTORY"
+	else
+		echo -e "NO directory found. rm -f : skipped"
+	fi
 }
 
 ################################################################################
@@ -151,7 +171,7 @@ function role2sshdevname() {
 	fi
 	echo "UNKNOWN"
 }
- 
+
 ################################################################################
 # Helper Functions for DUT
 ################################################################################
@@ -295,6 +315,21 @@ function getlogs_target() {
 	fi
 }
 
+function flush_testlogs() {
+	YEAR=$(date +"%Y")
+	saferm ${TC_LOGS}/${YEAR}*
+}
+
+function flush_selfreport() {
+	local ROLE=$1
+	if [ x"$ROLE" == x"DUT" ]; then
+		rm ${TC_LOGS}/${DUT_REPORT}*
+	else
+		rm ${TC_LOGS}/${LP_REPORT}*
+	fi
+
+}
+
 function scp2target() {
 	local TARGET=$(echo $NS_GLOBAL_TARGET)
 	local SRC="$1"
@@ -306,8 +341,43 @@ function scp2target() {
 	fi
 }
 
+function targets_alive_test() {
+	local dut_alive=$(echo $(run_dut_silence "cat ~/${DUT_REPORT}*") | grep ${DUT_REPORT} -c)
+	local lp_alive=$(echo $(run_lp_silence "cat ~/${LP_REPORT}*") | grep ${LP_REPORT} -c)
+
+	if [ x"$dut_alive" == x"0" ] || [ x"$lp_alive" == x"0" ]; then
+		echo "FAIL!!! DUT=$dut_alive LP=$lp_alive"
+	else
+		echo "PASS"
+	fi
+}
+
 ################################################################################
-# Misc Helper Functions
+# System Info & Control Helper Functions
+################################################################################
+function system_info_show() {
+	print_line
+	dmidecode -t processor
+	dmidecode -t bios
+	print_line
+	uname -a
+	print_line
+}
+
+function system_irqaffinity_remap() {
+	local IRQ_NUM=$1
+	local CORE=$2
+	run_cmd "echo $CORE > /proc/irq/$IRQ_NUM/smp_affinity"
+}
+
+function system_process_show() {
+	print_line
+	ps
+	print_line
+}
+
+################################################################################
+# Network Info Helper Functions
 ################################################################################
 
 # display_eth_info $DEVNAME $COMMENT_STRING
@@ -336,13 +406,13 @@ function display_eth_info () {
 
 function remove_all_ipaddr () {
 	local DEVNAME=$1
-	print_exe "ip address flush dev $DEVNAME"
+	run_cmd "ip address flush dev $DEVNAME"
 }
 
 function add_ipaddr () {
 	local DEVNAME=$1
 	local ADDR=$2
-	print_exe "ip address add $ADDR/24 dev $DEVNAME"
+	run_cmd "ip address add $ADDR/24 dev $DEVNAME"
 }
 
 function run_lp_restore_ipaddr() {
@@ -377,28 +447,98 @@ function dut_restore_ipaddr() {
 	fi
 }
 
-function flush_testlogs() {
-	YEAR=$(date +"%Y")
-	rm -rf ${TC_LOGS}/${YEAR}*
+function eth_irqaffinity_remap() {
+	IFACE=$1
+	QUEUE=$2
+	CORE=$3
+
+	# For /proc/interrupts format used by igb and stmmac
+	IRQ_NUM=$(cat /proc/interrupts | grep -e "$IFACE:$QUEUE\|$IFACE-$QUEUE" | awk '{print $1}' | rev | cut -c 2- | rev)
+	system_irqaffinity_remap $IRQ_NUM $CORE
 }
 
-function flush_selfreport() {
-	local ROLE=$1
-	if [ x"$ROLE" == x"DUT" ]; then
-		rm ${TC_LOGS}/${DUT_REPORT}*
-	else
-		rm ${TC_LOGS}/${LP_REPORT}*
-	fi
-
+################################################################################
+# Test Framework Functions
+################################################################################
+# non-block listen
+function target_listen_nb() {
+	local port=$1
+	echo "$(nc -w 5 -l -p $port)"
 }
 
-function alive_test() {
-	dut_alive=$(echo $(run_dut_silence "cat ~/${DUT_REPORT}*") | grep ${DUT_REPORT} -c)
-	lp_alive=$(echo $(run_lp_silence "cat ~/${LP_REPORT}*") | grep ${LP_REPORT} -c)
+function target_talk() {
+	local server=$1
+	local port=$2
+	local mesg=$3
+	# '-c' close socket on echo EOF
+	run_cmd "echo -e $mesg | nc -c $server $port"
+	echo -e $mesg | nc -c $server $port
+}
 
-	if [ x"$dut_alive" == x"0" ] || [ x"$lp_alive" == x"0" ]; then
-		echo "FAIL!!! DUT=$dut_alive LP=$lp_alive"
-	else
-		echo "PASS"
-	fi
+function target_ack_on() {
+	TARGET_IP=$1
+	TARGET_PORT=$2
+	TALKMSG=$3
+	ACKMSG=$4
+	while true ; do
+		target_talk $TARGET_IP $TARGET_PORT $TALKMSG
+		mesg=$(target_listen_nb $TARGET_PORT)
+		if [ x"$mesg" == x"$ACKMSG" ]; then
+			echo -e "Target receives $mesg"
+			# Relay talkmsg one more to avoid catch 22 scenario
+			target_talk $TARGET_IP $TARGET_PORT $TALKMSG
+			sleep 1
+			# Relay talkmsg one more to avoid catch 22 scenario
+			target_talk $TARGET_IP $TARGET_PORT $TALKMSG
+			break
+		fi
+
+		if [ x"$mesg" == x"TEST_ABORT" ]; then
+			echo -e "TEST ABORT!!!"
+			exit
+		fi
+	done
+}
+
+function loop_test_cnt() {
+	SCRIPT=$1
+	MAX=$2
+	count=0
+
+	print_topic "Loop Test: $CMD"
+	print_time
+	while true; do
+		count=$[$count+1]
+		if [ $count -gt $MAX ]; then
+			break
+		fi
+
+		print_topic "Loop=$count"
+		bash $SCRIPT $count
+
+		if [ x"$GLOBAL_STATUS" == x"LOOP_ABORT" ]; then
+			break;
+		fi
+		# Sleep a while to give process chance to reset its memory
+		sleep 3
+	done
+
+	print_banner "DONE: Loop Test: $CMD - Complete=$[$count-1]/$MAX"
+}
+
+function setup_tracelog_tc(){
+	local TC_LOGIN=$1
+	local DSTDIR=$2
+
+	echo -e "ssh $TC_LOGIN: mkdir -p $DSTDIR"
+	sshpass -p 'mypasscode' ssh -o StrictHostKeyChecking=no $TC_LOGIN "mkdir -p $DSTDIR"
+}
+
+function send_tracelog_tc() {
+	local TC_LOGIN=$1
+	local SRCFILE=$2
+	local DSTDIR=$3
+
+	echo -e "scp $TC_LOGIN: $SRCFILE"
+	sshpass -p 'mypasscode' scp -o StrictHostKeyChecking=no $SRCFILE $TC_LOGIN:$DSTDIR/$SRCFILE
 }

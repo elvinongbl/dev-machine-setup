@@ -19,14 +19,14 @@ function ethtool_poll_link() {
 
 function ethtool_show_link() {
 	local DEVNAME=$1
-	print_exe "ethtool $DEVNAME"
+	run_cmd "ethtool $DEVNAME"
 }
 
 function ethtool_change_link() {
 	local DEVNAME=$1
 	local SP=$2
 	local DUP=$3
-	print_exe "ethtool -s $DEVNAME duplex $DUP speed $SP autoneg on"
+	run_cmd "ethtool -s $DEVNAME duplex $DUP speed $SP autoneg on"
 }
 
 function ethtool_adv_cap() {
@@ -87,7 +87,7 @@ function ethtool_adv_cap() {
 		ADV=0x3F
 	fi
 
-	print_exe "ethtool -s $DEVNAME advertise $ADV"
+	run_cmd "ethtool -s $DEVNAME advertise $ADV"
 }
 
 # Make the LP's full capability as it is.
