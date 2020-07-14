@@ -22,10 +22,13 @@ fi
 function remove_nonboot_kernel() {
 	local RM_VER=$1
 	rm /boot/bzImage-kernel
-	rm /boot/config-${RM_VER}
-	rm /boot/System.map-${RM_VER}
-	# rm /boot/Module.symvers-${RM_VER}
-	rm -rf /lib/modules/${RM_VER}
+
+	if [ x"${RM_VER}" != x"UNKNOWN" ]; then
+		rm /boot/config-${RM_VER}
+		rm /boot/System.map-${RM_VER}
+		# rm /boot/Module.symvers-${RM_VER}
+		rm -rf /lib/modules/${RM_VER}
+	fi
 }
 
 # If test Linux fail to boot, we edit at GRUB to use GOLD-bzImage-kernel to
@@ -101,6 +104,8 @@ else
 	else
 		echo "Make: /lib/modules/GOLD-$BOOTVER"
 		cp -rf /lib/modules/$BOOTVER /lib/modules/GOLD-$BOOTVER
+		# Also back-up one version under ~/
+		cp -rf /lib/modules/$BOOTVER ~/GOLD-$BOOTVER
 		echo "$BOOTVER" > ${GOLDVER_FILE}
 	fi
 fi
